@@ -48,7 +48,11 @@ function Board({ size = 3 }) {
 
   React.useEffect(() => {
     if (winner !== 0) {
-      alert("Winner is Player " + (winner === 1 ? "X" : "O"));
+      if (winner === 2) {
+        alert("It's a Draw!");
+      } else {
+        alert("Winner is Player " + (winner === 1 ? "X" : "O"));
+      }
       setBoard(blankArray);
       setCurrentMove(1);
       setWinner(0);
@@ -61,14 +65,17 @@ function Board({ size = 3 }) {
     var firstDiagTotal = 0;
     var secondDiagTotal = 0;
     var z = size - 1;
+    var hasEmptyCells = false;
 
     for (x = 0; x < size; x++) {
       var rowTotal = 0;
       for (var y = 0; y < size; y++) {
-        rowTotal += board[x][y];
-        colTotals[y] += board[x][y];
+        var value = board[x][y];
+        if (value === 0) hasEmptyCells = true;
+        rowTotal += value;
+        colTotals[y] += value;
         if (x === y) {
-          firstDiagTotal += board[x][y];
+          firstDiagTotal += value;
         }
       }
 
@@ -91,6 +98,8 @@ function Board({ size = 3 }) {
         setWinner(colTotals[x] / size);
       }
     }
+
+    if (!hasEmptyCells) setWinner(2);
   }, [size, board]);
 
   return (
