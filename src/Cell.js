@@ -15,7 +15,7 @@ function Cell({ className, currentMove, value, onClick }) {
           "O"
         )
       ) : (
-        <span class="preview">{currentMove === 1 ? "X" : "O"}</span>
+        <span className="preview">{currentMove === 1 ? "X" : "O"}</span>
       )}
     </div>
   );

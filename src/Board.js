@@ -19,7 +19,7 @@ const useStyles = makeStyles(prop => ({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    fontSize: "10vw",
+    fontSize: "15vh",
     "&:hover": {
       "& .preview": {
         display: "block"
@@ -33,8 +33,7 @@ const useStyles = makeStyles(prop => ({
 }));
 
 function Board({ size = 3 }) {
-  const blankArray = new Array(size).fill(0).map(() => new Array(size).fill(0));
-  const [board, setBoard] = React.useState(blankArray);
+  const [board, setBoard] = React.useState(null);
   const [winner, setWinner] = React.useState(0);
   const [currentMove, setCurrentMove] = React.useState(1);
   const classes = useStyles({ size });
@@ -47,29 +46,35 @@ function Board({ size = 3 }) {
   };
 
   React.useEffect(() => {
+    setBoard(new Array(size).fill(0).map(() => new Array(size).fill(0)));
+  }, [size]);
+
+  React.useEffect(() => {
     if (winner !== 0) {
       if (winner === 2) {
         alert("It's a Draw!");
       } else {
         alert("Winner is Player " + (winner === 1 ? "X" : "O"));
       }
-      setBoard(blankArray);
+      setBoard(new Array(size).fill(0).map(() => new Array(size).fill(0)));
       setCurrentMove(1);
       setWinner(0);
     }
   }, [winner]);
 
   React.useEffect(() => {
-    var colTotals = new Array(size).fill(0);
+    if (!board) return;
+    const currentSize = board.length;
+    var colTotals = new Array(currentSize).fill(0);
     var x = 0;
     var firstDiagTotal = 0;
     var secondDiagTotal = 0;
-    var z = size - 1;
+    var z = currentSize - 1;
     var hasEmptyCells = false;
 
-    for (x = 0; x < size; x++) {
+    for (x = 0; x < board.length; x++) {
       var rowTotal = 0;
-      for (var y = 0; y < size; y++) {
+      for (var y = 0; y < board.length; y++) {
         var value = board[x][y];
         if (value === 0) hasEmptyCells = true;
         rowTotal += value;
@@ -82,38 +87,40 @@ function Board({ size = 3 }) {
       secondDiagTotal += board[x][z];
       z--;
 
-      if (Math.abs(rowTotal) === size) {
-        setWinner(rowTotal / size);
+      if (Math.abs(rowTotal) === currentSize) {
+        setWinner(rowTotal / currentSize);
       }
     }
 
-    if (Math.abs(firstDiagTotal) === size) {
-      setWinner(firstDiagTotal / size);
-    } else if (Math.abs(secondDiagTotal) === size) {
-      setWinner(secondDiagTotal / size);
+    if (Math.abs(firstDiagTotal) === currentSize) {
+      setWinner(firstDiagTotal / currentSize);
+    } else if (Math.abs(secondDiagTotal) === currentSize) {
+      setWinner(secondDiagTotal / currentSize);
     }
 
-    for (x = 0; x < size; x++) {
-      if (Math.abs(colTotals[x]) === size) {
-        setWinner(colTotals[x] / size);
+    for (x = 0; x < board.length; x++) {
+      if (Math.abs(colTotals[x]) === currentSize) {
+        setWinner(colTotals[x] / currentSize);
       }
     }
 
     if (!hasEmptyCells) setWinner(2);
-  }, [size, board]);
+  }, [board]);
 
   return (
     <div className={classes.board}>
-      {board.map((row, rowIndex) =>
-        row.map((cell, cellIndex) => (
-          <Cell
-            currentMove={currentMove}
-            value={board[rowIndex][cellIndex]}
-            className={classes.cell}
-            onClick={() => makeMove(rowIndex, cellIndex)}
-          />
-        ))
-      )}
+      {board &&
+        board.map((row, rowIndex) =>
+          row.map((cell, cellIndex) => (
+            <Cell
+              key={`cell-${rowIndex}-${cellIndex}`}
+              currentMove={currentMove}
+              value={board[rowIndex][cellIndex]}
+              className={classes.cell}
+              onClick={() => makeMove(rowIndex, cellIndex)}
+            />
+          ))
+        )}
     </div>
   );
 }
